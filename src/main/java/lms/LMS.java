@@ -59,7 +59,7 @@ class LMS {
                 // showing member options
                 if (choice != 1) {
                     // a user is trying to create an account
-                    library.signup();
+                    library.createMember();
                     System.out.println("Account created."
                             + " Redirecting to login page..");
                 }

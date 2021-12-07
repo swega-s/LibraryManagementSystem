@@ -84,7 +84,7 @@ class Library {
     }
     
     // creating a new account
-    public void signup() {
+    public void createMember() {
         Scanner newUserInput = new Scanner(System.in);
         
         System.out.print("Enter an id: ");
