@@ -54,6 +54,7 @@ class Library {
         
         // setting a default librarian
         Account account = new Librarian(1L, "LIBRARIAN", AccountStatus.ACTIVE);
+        librarian = (Librarian) account;
         accounts.put(account.id, account);
     }
     
