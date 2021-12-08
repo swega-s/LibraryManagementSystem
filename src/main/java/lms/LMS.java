@@ -1,5 +1,6 @@
 package lms;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 /**
@@ -14,7 +15,13 @@ class LMS {
 
         while (true) {
             System.out.print("Enter your choice: ");
-            choice = scanner.nextInt();
+
+            try {
+                choice = scanner.nextInt();
+            } catch (InputMismatchException exception) {
+                System.out.println("Enter a valid number input");
+                return getInput(minValue, maxValue);
+            }
 
             if (!(minValue > choice || choice > maxValue)) {
                 return choice;
