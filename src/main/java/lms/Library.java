@@ -17,14 +17,7 @@ class Library {
     
     // only a single instance of library is creating (a singleton pattern)
     private static Library obj;
-    
-    public static Library getInstance() {
-        if (obj == null) {
-            obj = new Library();
-        }
-        return obj;
-    }
-    
+
     // private constructor
     private Library() {
         name = null;
@@ -32,6 +25,13 @@ class Library {
         accounts = new HashMap();
         books = new HashMap();
         lentBooks = new HashMap();
+    }
+
+    public static Library getInstance() {
+        if (obj == null) {
+            obj = new Library();
+        }
+        return obj;
     }
 
     // getter of library name
@@ -53,9 +53,13 @@ class Library {
     public void populateLibrary() {
         
         // setting a default librarian
-        Account account = new Librarian(1L, "LIBRARIAN", AccountStatus.ACTIVE);
-        librarian = (Librarian) account;
-        accounts.put(account.id, account);
+        Librarian account = new Librarian(1L, "LIBRARIAN", AccountStatus.ACTIVE);
+        if (librarian == null) {
+            librarian = account;
+            accounts.put(account.id, account);
+        } else {
+            System.out.println("Only one librarian should be assigned for a library");
+        }
     }
     
     // logging using given data
@@ -63,27 +67,26 @@ class Library {
         Scanner userInput = new Scanner(System.in);
                     
         // a user with account is trying to log in
-        System.out.print("Enter your member id: ");
-        long memberId = userInput.nextLong();
+        System.out.print("Enter your account id: ");
+        long accountId = userInput.nextLong();
                     
-        if (accounts.containsKey(memberId)) {
+        if (accounts.containsKey(accountId)) {
             System.out.print("Enter your password: ");
-            String memberPass = userInput.next();
+            String accountPass = userInput.next();
                         
-            if (memberPass.equals(accounts.get(memberId).password)) { 
+            if (accountPass.equals(accounts.get(accountId).password)) {
                 return true;
             } else {
                 System.out.println("Wrong password. Try again!");
-                login();
+                return login();
             }
         } else {
-            System.out.println("Invalid member id. Try again!");
-            login();
+            System.out.println("Invalid account id. Try again!");
+            return login();
         }
-        return false;
     }
     
-    // creating a new account
+    // creating a new account (member)
     public void createMember() {
         Scanner newUserInput = new Scanner(System.in);
         
@@ -98,7 +101,7 @@ class Library {
         
         System.out.print("Enter a password: ");
         String pass = newUserInput.next();
-        
+
         Account newAccount = new Member(id, pass, AccountStatus.ACTIVE);
         accounts.put(id, newAccount);
     }

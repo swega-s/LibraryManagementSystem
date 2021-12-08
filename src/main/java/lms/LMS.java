@@ -8,7 +8,7 @@ import java.util.Scanner;
 class LMS {
 
     // getting input choice with a min and max range
-    public static int getInput(int minValue, int maxValue) {
+    private static int getInput(int minValue, int maxValue) {
         int choice;
         Scanner scanner = new Scanner(System.in);
 
@@ -42,14 +42,13 @@ class LMS {
             System.out.println("Choose a user type\n");
             System.out.println("1. Member");
             System.out.println("2. Librarian");
-            System.out.println("3. Admin");
-            System.out.println("4. Exit");
+            System.out.println("3. Exit");
 
-            int choice = getInput(1, 4);
+            int choice = getInput(1, 3);
 
             if (choice == 1) {
 
-                // go to login/ signup page
+                // go to log in or signup page
                 System.out.println("Already a user?"
                         + "\nIf yes, SignIn; Else SignUp");
                 System.out.println("1. Sign In\n2. Sign Up");
@@ -72,22 +71,6 @@ class LMS {
                     // showing librarian options
                     System.out.println("showing librarian options now");
                 }
-            } else if (choice == 3) {
-                // get password to check if this is admin
-                Scanner scanner = new Scanner(System.in);
-                String adminPassInput = scanner.next();
-
-                do {
-                    if (adminPassInput.equals("LIB_ADMIN")) {
-                        // show admin options
-                        System.out.println("showing admin options");
-                        break;
-                    } else {
-                        System.out.println("Wrong password. Try again!");
-                        adminPassInput = scanner.next();
-                    }
-                } while (true);
-
             } else {
                 loop = false;
                 System.out.println("Thank you..");
