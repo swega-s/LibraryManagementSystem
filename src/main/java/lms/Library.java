@@ -1,6 +1,7 @@
 
 package lms;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -11,8 +12,8 @@ import java.util.Scanner;
 class Library {
     private String name;
     private Librarian librarian;
-    private HashMap<Long, Account> accounts;
-    private HashMap<Long, Book> books;
+    private HashMap<String, Account> accounts;
+    private ArrayList<Book> books;
     private HashMap<Long, Book> lentBooks;
     
     // only a single instance of library is creating (a singleton pattern)
@@ -23,7 +24,7 @@ class Library {
         name = null;
         librarian = null;
         accounts = new HashMap();
-        books = new HashMap();
+        books = new ArrayList();
         lentBooks = new HashMap();
     }
 
@@ -45,7 +46,7 @@ class Library {
     }
     
     // getter of accounts
-    public HashMap<Long, Account> getAccounts() {
+    public HashMap<String, Account> getAccounts() {
         return accounts;
     }
     
@@ -53,36 +54,49 @@ class Library {
     public void populateLibrary() {
         
         // setting a default librarian
-        Librarian account = new Librarian(1L, "LIBRARIAN", AccountStatus.ACTIVE);
+        Librarian account = new Librarian("librarian", "LIBRARIAN", AccountStatus.ACTIVE);
         if (librarian == null) {
             librarian = account;
-            accounts.put(account.id, account);
+            accounts.put(account.username, account);
         } else {
             System.out.println("Only one librarian should be assigned for a library");
+        }
+    }
+
+    // asking the user whether he wishes to try again after unsuccessful login
+    private boolean continueLogin() {
+
+        Scanner userInput = new Scanner(System.in);
+        System.out.println("Press c         - Try again\n" +
+                "any other char - Go back or exit");
+        if (userInput.next().equals("c")) {
+            return login();
+        } else {
+            return false;
         }
     }
     
     // logging using given data
     public boolean login() {
         Scanner userInput = new Scanner(System.in);
-                    
+
         // a user with account is trying to log in
-        System.out.print("Enter your account id: ");
-        long accountId = userInput.nextLong();
+        System.out.print("Enter your account username: ");
+        String username = userInput.next();
                     
-        if (accounts.containsKey(accountId)) {
+        if (accounts.containsKey(username)) {
             System.out.print("Enter your password: ");
             String accountPass = userInput.next();
                         
-            if (accountPass.equals(accounts.get(accountId).password)) {
+            if (accountPass.equals(accounts.get(username).password)) {
                 return true;
             } else {
                 System.out.println("Wrong password. Try again!");
-                return login();
+                return continueLogin();
             }
         } else {
-            System.out.println("Invalid account id. Try again!");
-            return login();
+            System.out.println("Invalid username. Try again!");
+            return continueLogin();
         }
     }
     
@@ -90,19 +104,19 @@ class Library {
     public void createMember() {
         Scanner newUserInput = new Scanner(System.in);
         
-        System.out.print("Enter an id: ");
-        long id = newUserInput.nextLong();
+        System.out.print("Enter a username: ");
+        String username = newUserInput.next();
 
-        while (accounts.containsKey(id)) {
-            System.out.println("User id not available!");
-            System.out.print("Enter an id: ");
-            id = newUserInput.nextLong();
+        while (accounts.containsKey(username)) {
+            System.out.println("Username not available!");
+            System.out.print("Enter a username: ");
+            username = newUserInput.next();
         }
         
         System.out.print("Enter a password: ");
         String pass = newUserInput.next();
 
-        Account newAccount = new Member(id, pass, AccountStatus.ACTIVE);
-        accounts.put(id, newAccount);
+        Account newAccount = new Member(username, pass, AccountStatus.ACTIVE);
+        accounts.put(username, newAccount);
     }
 }

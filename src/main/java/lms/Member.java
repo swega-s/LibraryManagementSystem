@@ -7,7 +7,7 @@ package lms;
  */
 class Member extends Account {
     
-   public Member(Long aid, String pass, AccountStatus aStatus) {
-        super(aid, pass, aStatus);
+   public Member(String uname, String pass, AccountStatus aStatus) {
+        super(uname, pass, aStatus);
     }
 }

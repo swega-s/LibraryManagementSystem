@@ -6,12 +6,12 @@ package lms;
  * @author Swega
  */
 abstract class Account {
-    long id;
+    String username;
     String password;
     AccountStatus status;
     
-    public Account(Long aid, String pass, AccountStatus aStatus){
-        id = aid;
+    public Account(String uname, String pass, AccountStatus aStatus){
+        username = uname;
         password = pass;
         status = aStatus;
     }

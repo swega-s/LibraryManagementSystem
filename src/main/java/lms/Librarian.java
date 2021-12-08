@@ -7,7 +7,7 @@ package lms;
  */
 class Librarian extends Account {
 
-    public Librarian(Long aid, String pass, AccountStatus aStatus) {
-        super(aid, pass, aStatus);
+    public Librarian(String uname, String pass, AccountStatus aStatus) {
+        super(uname, pass, aStatus);
     }
 }
