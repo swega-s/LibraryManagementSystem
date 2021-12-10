@@ -126,45 +126,70 @@ class Library {
     // Searching Books on basis of title, Subject or Author
     public ArrayList<Long> searchForBooks() throws IOException {
         String choice;
-        String title = "", subject = "", author = "";
+        String title = "", subject = "", author = "", keyword = "";
 
         Scanner sc = new Scanner(System.in);
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
         while (true) {
-            System.out.println("\nEnter either '1' or '2' or '3' for search by Title, Subject or Author of Book respectively: ");
+            System.out.println("""
+                    Enter
+                    1. Title
+                    2. Subject
+                    3. Author
+                    4. Any keyword""");
             choice = sc.next();
 
-            if (choice.equals("1") || choice.equals("2") || choice.equals("3"))
+            if (choice.equals("1") || choice.equals("2") || choice.equals("3") || choice.equals("4"))
                 break;
             else
                 System.out.println("\nWrong Input!");
         }
 
-        if (choice.equals("1")) {
-            System.out.println("\nEnter the Title of the Book: ");
-            title = reader.readLine();
-        } else if (choice.equals("2")) {
-            System.out.println("\nEnter the Subject of the Book: ");
-            subject = reader.readLine();
-        } else {
-            System.out.println("\nEnter the Author of the Book: ");
-            author = reader.readLine();
+        switch (choice) {
+            case "1" -> {
+                System.out.println("\nEnter the Title of the Book: ");
+                title = reader.readLine();
+            }
+            case "2" -> {
+                System.out.println("\nEnter the Subject of the Book: ");
+                subject = reader.readLine();
+            }
+            case "3" -> {
+                System.out.println("\nEnter the Author of the Book: ");
+                author = reader.readLine();
+            }
+            case "4" -> {
+                System.out.println("\nEnter any keyword you remember to search: ");
+                keyword = reader.readLine();
+            }
         }
 
         ArrayList<Long> matchedBooks = new ArrayList<>();
 
         // getting all books that matches condition with the given user's input
         for (Book b : books.values()) {
-            if (choice.equals("1")) {
-                if (b.getTitle().equalsIgnoreCase(title))
-                    matchedBooks.add(b.getBookId());
-            } else if (choice.equals("2")) {
-                if (b.getSubject().equalsIgnoreCase(subject))
-                    matchedBooks.add(b.getBookId());
-            } else {
-                if (b.getAuthorName().equalsIgnoreCase(author))
-                    matchedBooks.add(b.getBookId());
+            switch (choice) {
+                case "1":
+                    if (b.getTitle().equalsIgnoreCase(title))
+                        matchedBooks.add(b.getBookId());
+                    break;
+                case "2":
+                    if (b.getSubject().equalsIgnoreCase(subject))
+                        matchedBooks.add(b.getBookId());
+                    break;
+                case "3":
+                    if (b.getAuthorName().equalsIgnoreCase(author))
+                        matchedBooks.add(b.getBookId());
+                    break;
+                default:
+                    keyword = keyword.toLowerCase();
+                    if (b.getTitle().toLowerCase().contains(keyword) ||
+                            b.getSubject().contains(keyword) ||
+                            b.getAuthorName().contains(keyword)) {
+                        matchedBooks.add(b.getBookId());
+                    }
+                    break;
             }
         }
 
@@ -173,7 +198,7 @@ class Library {
             System.out.println("\nThese books are found: \n");
 
             System.out.println("----------------------------------------------------------------------------");
-            System.out.println("No.\t\tISBN\t\t\tTitle\t\t\t\tAuthor\t\t\t\tSubject");
+            System.out.println("No.\t\tISBN\t\tTitle\t\t\tAuthor\t\t\tSubject");
             System.out.println("----------------------------------------------------------------------------");
 
             for (Long matchedBook : matchedBooks) {
