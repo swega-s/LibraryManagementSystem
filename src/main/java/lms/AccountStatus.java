@@ -5,6 +5,6 @@ package lms;
  *
  * @author Swega
  */
-public enum AccountStatus {
+enum AccountStatus {
     ACTIVE, BLOCKED
 }
