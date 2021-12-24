@@ -2,15 +2,14 @@
 package lms;
 
 /**
- *
  * @author Swega
  */
 abstract class Account {
     private final String username;
     private String password;
     private AccountStatus status;
-    
-    public Account(String uname, String pass, AccountStatus aStatus){
+
+    public Account(String uname, String pass, AccountStatus aStatus) {
         username = uname;
         password = pass;
         status = aStatus;
@@ -37,9 +36,17 @@ abstract class Account {
     }
 
     public void printInfo() {
-        System.out.println("----------------------------------------------------------------------------");
-        System.out.println("Username: " + username);
+        System.out.println("----------------------------------------------------------------------------------");
+        System.out.println("Username      : " + username);
         System.out.println("Account Status: " + status);
-        System.out.println("----------------------------------------------------------------------------");
+        System.out.println("----------------------------------------------------------------------------------");
+    }
+
+    @Override
+    public String toString() {
+        return "----------------------------------------------------------------------------------\n" +
+                "Username      : " + username + "\n" +
+                "Account Status: " + status + "\n" +
+                "----------------------------------------------------------------------------------\n";
     }
 }

@@ -30,17 +30,21 @@ class UtilityClass {
     }
 
     // getting input choice with a given set of values
-    static long getInput(List<Long> valuesList) {
-        long choice;
+    static String getInput(List<String> valuesList) {
+        String choice;
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
             System.out.print("Enter your choice: ");
 
             try {
-                choice = scanner.nextLong();
+                choice = scanner.next();
             } catch (InputMismatchException exception) {
                 System.out.println("Enter a valid number input");
+                System.out.print("Wish to continue?\n1. Yes\n2. Go back\nEnter your input: ");
+                if (UtilityClass.getInput(1, 2) == 2) {
+                    return null;
+                }
                 return getInput(valuesList);
             }
 
@@ -48,6 +52,10 @@ class UtilityClass {
                 return choice;
             } else {
                 System.out.println("Invalid input");
+                System.out.print("Wish to continue?\n1. Yes\n2. Go back\nEnter your input: ");
+                if (UtilityClass.getInput(1, 2) == 2) {
+                    return null;
+                }
             }
         }
     }

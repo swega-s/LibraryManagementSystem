@@ -2,7 +2,6 @@
 package lms;
 
 /**
- *
  * @author Swega
  */
 enum AccountStatus {

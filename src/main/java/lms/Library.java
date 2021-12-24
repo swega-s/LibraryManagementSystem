@@ -15,10 +15,7 @@ class Library {
     private String name;
     private Admin admin;
     private final HashMap<String, Account> accounts;
-    private final HashMap<Long, Book> books;
-    private final HashMap<String, ArrayList<BookLending>> lentBooks;
-
-    private static long booksIdCount;
+    private final HashMap<String, Book> booksList;
 
     // only a single instance of library is creating (a singleton pattern)
     private static Library obj;
@@ -28,9 +25,7 @@ class Library {
         name = null;
         admin = null;
         accounts = new HashMap<>();
-        books = new HashMap<>();
-        lentBooks = new HashMap<>();
-        booksIdCount = 0;
+        booksList = new HashMap<>();
     }
 
     public static Library getInstance() {
@@ -60,19 +55,18 @@ class Library {
         accounts.put(member.getUsername(), member);
     }
 
-    // getter of admin
-    public Admin getAdmin() {
-        return admin;
+    // change book status
+    public void changeBookAvailability(String bookId) {
+        booksList.get(bookId).changeCount(-1);
     }
 
-    // change book status
-    public void changeBookAvailability(long bookId, boolean availability) {
-        books.get(bookId).setAvailable(availability);
+    public HashMap<String, Book> getBooksList() {
+        return booksList;
     }
 
     // checking the book availability status
-    public boolean checkBookAvailability(long bookId) {
-        return books.get(bookId).isAvailable();
+    public boolean checkBookAvailability(String bookId) {
+        return booksList.get(bookId).getCount() > 0;
     }
 
     // populating library details with default information
@@ -92,14 +86,17 @@ class Library {
     private boolean continueLogin() {
 
         Scanner userInput = new Scanner(System.in);
-        System.out.println("Press c        - Try again\n" +
-                "any other char - Go back or exit");
+        System.out.println("""
 
+                Press c        - Try again
+                any other char - Go back or exit""");
+
+        System.out.print("Enter your choice: ");
         return userInput.next().equals("c");
     }
 
-    // logging using given data
-    public Account login() {
+    // trying to log in using given data
+    public Account login(String className) {
         Scanner userInput = new Scanner(System.in);
 
         // a user with account is trying to log in
@@ -107,24 +104,41 @@ class Library {
         String username = userInput.next();
 
         if (accounts.containsKey(username)) {
-            System.out.print("Enter your account password: ");
-            String accountPass = userInput.next();
 
             Account curAccount = accounts.get(username);
-            if (curAccount.getStatus() == AccountStatus.ACTIVE && accountPass.equals(curAccount.getPassword())) {
-                return curAccount;
+            if (curAccount.getStatus() == AccountStatus.ACTIVE) {
+
+                // authorization
+                if (curAccount.getClass().getSimpleName().equals(className)) {
+
+                    // asking for the password from the user
+                    System.out.print("Enter your account password: ");
+                    String accountPass = userInput.next();
+
+                    // authentication
+                    if (accountPass.equals(curAccount.getPassword())) {
+                        return curAccount;
+                    } else {
+                        System.out.println("Wrong password. Try again!");
+                        return continueLogin() ? login(className) : null;
+                    }
+                } else {
+                    System.out.println("Irrelevant account information. Try again!");
+                    return continueLogin() ? login(className) : null;
+                }
+
             } else {
-                System.out.println("Wrong password. Try again!");
-                return continueLogin() ? login() : null;
+                System.out.println("Account is blocked. Contact administrator for further details.");
+                return null;
             }
         } else {
             System.out.println("Invalid username. Try again!");
-            return continueLogin() ? login() : null;
+            return continueLogin() ? login(className) : null;
         }
     }
 
     // Searching Books on basis of title, Subject or Author
-    public ArrayList<Long> searchForBooks() throws IOException {
+    public ArrayList<String> searchForBooks() throws IOException {
         String choice;
         String title = "", subject = "", author = "", keyword = "";
 
@@ -165,10 +179,10 @@ class Library {
             }
         }
 
-        ArrayList<Long> matchedBooks = new ArrayList<>();
+        ArrayList<String> matchedBooks = new ArrayList<>();
 
         // getting all books that matches condition with the given user's input
-        for (Book b : books.values()) {
+        for (Book b : booksList.values()) {
             switch (choice) {
                 case "1":
                     if (b.getTitle().equalsIgnoreCase(title))
@@ -197,12 +211,12 @@ class Library {
         if (!matchedBooks.isEmpty()) {
             System.out.println("\nThese books are found: \n");
 
-            System.out.println("----------------------------------------------------------------------------");
-            System.out.println("No.\t\tISBN\t\tTitle\t\t\tAuthor\t\t\tSubject");
-            System.out.println("----------------------------------------------------------------------------");
+            System.out.println("----------------------------------------------------------------------------------");
+            System.out.println("No.\t\tTitle\t\t\tAuthor\t\t\tSubject");
+            System.out.println("----------------------------------------------------------------------------------");
 
-            for (Long matchedBook : matchedBooks) {
-                books.get(matchedBook).printInfo();
+            for (String matchedBook : matchedBooks) {
+                booksList.get(matchedBook).printInfo();
                 System.out.print("\n");
             }
 
@@ -218,14 +232,9 @@ class Library {
     public Member findMember() {
         System.out.println("Enter member username: ");
 
-        String username = "";
+        String username;
         Scanner scanner = new Scanner(System.in);
-
-        try {
-            username = scanner.next();
-        } catch (InputMismatchException e) {
-            System.out.println("\nInvalid Input");
-        }
+        username = scanner.next();
 
         Account member = accounts.get(username);
         if (member != null && member.getClass().getSimpleName().equals("Member")) {
@@ -236,124 +245,90 @@ class Library {
         }
     }
 
+    // creating a new account (member)
+    public void signUp() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter a username: ");
+        String username = scanner.next();
+
+        while (accounts.containsKey(username)) {
+            System.out.println("Username not available!");
+            System.out.print("Enter a username: ");
+            username = scanner.next();
+        }
+
+        System.out.print("Enter a password: ");
+        String pass = scanner.next();
+
+        Member newAccount = new Member(username, pass, AccountStatus.ACTIVE);
+        addMember(newAccount);
+    }
+
     // creating and adding the book to library
-    public void createBook(String isbn, String title, String authorName, String subject) {
-
-        booksIdCount += 1;
-        books.put(booksIdCount, new Book(booksIdCount, isbn, title, authorName, subject));
-        System.out.println(books.size());
-    }
-
-    // return a book (from the member)
-    public void removeBookFromMember(String memberName, long bookId) {
-        BookLending bookLent = null;
-
-        for (BookLending bookLending : lentBooks.get(memberName)) {
-            if (bookLending.getBookId() == bookId) {
-                bookLent = bookLending;
-                break;
-            }
-        }
-
-        if (bookLent != null) {
-            // check for fine
-            LocalDate rDate = bookLent.getReturnDate(); // return date per record
-
-            // checking for an expired return date condition
-            LocalDate rtDate = LocalDate.parse("2021-12-29"); // actual returning date
-
-            // checking whether the recorded return date is equal or before to actual returning date
-            boolean isReturnDateExpired = rDate.isBefore(rtDate) || rDate.equals(rtDate);
-
-            if (isReturnDateExpired) {
-                System.out.println("You have to pay the fine");
-                computeFine((int) rDate.until(rtDate, ChronoUnit.DAYS));
-            }
-            lentBooks.get(memberName).remove(bookLent);
-            books.get(bookId).setAvailable(true);
-        } else {
-            System.out.println("no book with the given id. try again!");
-        }
-    }
-
-    // computing fine for the books
-    private void computeFine(int daysDifference) {
-
-        System.out.println("----------------------------------------------------------------------------");
-        System.out.println("You have a fine to pay");
-        int total = 0;
-        total += daysDifference * 2; // for each day let fine amount be Rs.2
-
-        System.out.println("You should pay Rs." + total);
-        System.out.println("----------------------------------------------------------------------------");
-    }
-
-    // creating a lending object for a book being borrowed by a member
-    public void addLendingBook(BookLending bookLendingObj) {
-        String memberName = bookLendingObj.getMemberName();
-
-        if (lentBooks.containsKey(memberName)) {
-            if (lentBooks.get(memberName).size() < 3) {
-                lentBooks.get(memberName).add(bookLendingObj);
-                books.get(bookLendingObj.getBookId()).addToBorrowedHistory(memberName);
-            } else {
-                System.out.println("Maximum limit reached to borrow a book");
-            }
-        } else {
-            ArrayList<BookLending> newList = new ArrayList<>();
-            newList.add(bookLendingObj);
-            lentBooks.put(memberName, newList);
-            books.get(bookLendingObj.getBookId()).addToBorrowedHistory(memberName);
-        }
-    }
-
-    // printing details of a particular member's borrowed book list
-    public void printMemberBorrowedDetails(String memberName) {
-        if (lentBooks.containsKey(memberName)) {
-            for (BookLending bookLending : lentBooks.get(memberName)) {
-                System.out.print("Book Name: " + books.get(bookLending.getBookId()).getTitle().toUpperCase() + "\n");
-                bookLending.printInfo();
-            }
-        } else {
-            System.out.println(memberName + " have not borrowed any books currently.");
-        }
-    }
-
-    // returning total count of borrowed books by a particular member at present
-    public List<Long> getBorrowedBooksSizeOfMember(String memberName) {
-        if (lentBooks.containsKey(memberName)) {
-            ArrayList<Long> lentBooksId = new ArrayList<>();
-            for (BookLending bookLending : lentBooks.get(memberName)) {
-                lentBooksId.add(bookLending.getBookId());
-            }
-            return lentBooksId;
-        }
-        return null;
+    public void createBook(String bookId, String title, String authorName, String subject, int count) {
+        booksList.put(bookId, new Book(bookId, title, authorName, subject, count));
     }
 
     // changing password of any account
-    public void changePassword(String accountUsername) throws IOException {
+    public void changePassword(String accountUsername) {
         Account curAccount = accounts.get(accountUsername);
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        Scanner sc = new Scanner(System.in);
 
         // getting the old password to verify the user
         System.out.print("Enter old password: ");
-        if (reader.readLine().equals(curAccount.getPassword())) {
+        if (sc.nextLine().equals(curAccount.getPassword())) {
             System.out.println("enter new password: ");
-            curAccount.setPassword(reader.readLine());
+            curAccount.setPassword(sc.nextLine());
         } else {
             System.out.println("Wrong password. Try some other time");
+            System.out.println("Wish to try again?\n1. yes\n2. no");
+
+            if (sc.nextLine().equals("1")) {
+                changePassword(accountUsername);
+            } else {
+                System.out.println("Redirecting to home page");
+            }
         }
     }
 
     // show borrowed book history of a particular book
-    public void showBorrowedHistory(long bookId) {
-        books.get(bookId).printBorrowedHistory();
+    public void showBorrowedHistory(String bookId) {
+        booksList.get(bookId).printBorrowedHistory();
     }
 
     // check whether a member have any borrowed books at present
     public boolean haveBorrowedBooks(String memberName) {
-        return (lentBooks.containsKey(memberName) && lentBooks.get(memberName).size() == 0);
+        Member member = (Member) accounts.get(memberName);
+        return member.haveCurrentlyBorrowedBooks();
+//        return (lentBooks.containsKey(memberName) && lentBooks.get(memberName).size() != 0);
     }
+
+    // getting borrow request from a member
+    public void requestForBookBorrowal(String member, String isbn) {
+
+        // checking if the book is available to issue
+        if (checkBookAvailability(isbn)) {
+            LocalDate todayDate = LocalDate.now();
+
+            changeBookAvailability(isbn);
+
+            LocalDate returnDate = LocalDate.now().plusDays(15);
+            BookLending lendingBook = new BookLending(isbn, member, todayDate, returnDate);
+
+            Member member1 = (Member) accounts.get(member);
+            member1.addLendingBook(lendingBook);
+
+        } else {
+            System.out.println("The book is not available at present. " +
+                    "Try searching any other books..");
+        }
+    }
+
+    // get a book with the given id
+    public Book getBook(String id) {
+        return booksList.get(id);
+    }
+
 }

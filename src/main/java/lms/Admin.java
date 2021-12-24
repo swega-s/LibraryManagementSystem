@@ -1,11 +1,9 @@
 
 package lms;
 
-import java.time.LocalDate;
 import java.util.Scanner;
 
 /**
- *
  * @author Swega
  */
 class Admin extends Account {
@@ -16,51 +14,60 @@ class Admin extends Account {
         super(uname, pass, aStatus);
     }
 
-    // return a book by a particular member
-    public void returnBook(String memberName, long bookId) {
-        library.removeBookFromMember(memberName, bookId);
-    }
+    // adding a book to the library
+    public void addBook() {
+        Scanner scanner = new Scanner(System.in);
 
-    // issuing a book to a particular member
-    public void issueBook(Member member, long bookId) {
+        System.out.println("\nEnter bookId:");
+        String bookId = scanner.nextLine();
 
-        LocalDate todayDate = LocalDate.now();
-
-        // checking if the book is available to issue
-        if (library.checkBookAvailability(bookId)) {
-            System.out.println("book is available.");
-            library.changeBookAvailability(bookId, false);
-
-            LocalDate returnDate = LocalDate.now().plusDays(15);
-            BookLending lendingBook = new BookLending(member.getUsername(), bookId, todayDate, returnDate);
-
-            library.addLendingBook(lendingBook);
-
+        if (library.getBooksList().containsKey(bookId)) {
+            System.out.print("Book already exists!\nEnter the no of stocks to be added: ");
+            int count = scanner.nextInt();
+            library.getBooksList().get(bookId).changeCount(count);
         } else {
-            System.out.println("The book is already taken by someone. " +
-                    "Try searching any other books..");
-            // add a condition whether to continue searching or going back
+            System.out.println("\nEnter Title:");
+            String title = scanner.nextLine();
 
+            System.out.println("\nEnter Author:");
+            String author = scanner.nextLine();
+
+            System.out.println("\nEnter Subject:");
+            String subject = scanner.nextLine();
+
+            System.out.println("\nEnter stock quantity:");
+            int count = scanner.nextInt();
+
+            library.createBook(bookId, title, author, subject, count);
         }
     }
 
-    // creating a new account (member)
-    public void createMember() {
-        Scanner newUserInput = new Scanner(System.in);
-
-        System.out.print("Enter a username: ");
-        String username = newUserInput.next();
-
-        while (library.getAccounts().containsKey(username)) {
-            System.out.println("Username not available!");
-            System.out.print("Enter a username: ");
-            username = newUserInput.next();
+    // block a member
+    public void blockMember(Member member) {
+        if (!library.haveBorrowedBooks(member.getUsername())) {
+            if (member.getStatus() != AccountStatus.BLOCKED) {
+                member.setStatus(AccountStatus.BLOCKED);
+                System.out.println("Account blocked successfully..");
+            } else {
+                System.out.println("This account is already blocked");
+            }
+        } else {
+            System.out.println("Member must return borrowed books.");
         }
+    }
 
-        System.out.print("Enter a password: ");
-        String pass = newUserInput.next();
+    // unblock a member
+    public void unblockMember(Member member) {
+        if (member.getStatus() != AccountStatus.ACTIVE) {
+            member.setStatus(AccountStatus.ACTIVE);
+            System.out.println("Account is re-activated successfully..");
+        } else {
+            System.out.println("this account is already active.");
+        }
+    }
 
-        Member newAccount = new Member(username, pass, AccountStatus.ACTIVE);
-        library.addMember(newAccount);
+    // checking whether the status change is possible
+    private boolean canChangeStatus(Account member, AccountStatus statusToChange) {
+        return library.getAccounts().get(member.getUsername()).getStatus().equals(statusToChange);
     }
 }

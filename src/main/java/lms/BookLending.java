@@ -9,12 +9,21 @@ import java.time.temporal.ChronoUnit;
  */
 class BookLending {
 
+    private final String bookId;
     private final String memberName;
-    private final long bookId;
     private final LocalDate issuedDate;
     private final LocalDate returnDate;
+    private LocalDate actualReturningDate;
 
-    public long getBookId() {
+    public BookLending(String id, String memberName, LocalDate issuedDate, LocalDate returnDate) {
+        this.bookId = id;
+        this.memberName = memberName;
+        this.issuedDate = issuedDate;
+        this.returnDate = returnDate;
+        this.actualReturningDate = null;
+    }
+
+    public String getBookId() {
         return bookId;
     }
 
@@ -30,11 +39,12 @@ class BookLending {
         return returnDate;
     }
 
-    public BookLending(String memberName, long bookId, LocalDate issuedDate, LocalDate returnDate) {
-        this.memberName = memberName;
-        this.bookId = bookId;
-        this.issuedDate = issuedDate;
-        this.returnDate = returnDate;
+    public LocalDate getActualReturningDate() {
+        return actualReturningDate;
+    }
+
+    public void setActualReturningDate(LocalDate actualReturningDate) {
+        this.actualReturningDate = actualReturningDate;
     }
 
     // printing details about a particular borrow entry of a book
@@ -42,9 +52,11 @@ class BookLending {
 
         //temp cur date
         //LocalDate curDate = LocalDate.parse("2021-12-29");
+        // LocalDate.now().until(returnDate, ChronoUnit.DAYS)
 
-        System.out.println("Book id: " + bookId + "\t\tissued at: " + issuedDate + "\t\t"
-                + "Return date: " + returnDate + "\t\tDue in: "
-                + LocalDate.now().until(returnDate, ChronoUnit.DAYS) + "days\n");
+        System.out.println("Book id: " + bookId + "\tissued to: " + memberName + "\tissued at: " + issuedDate + "\t"
+                + "Due date: " + returnDate + "\tReturned date: " + this.actualReturningDate + "\n");
+
     }
+
 }
